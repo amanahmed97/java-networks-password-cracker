@@ -1,0 +1,20 @@
+package com.example.backend;
+
+public class Hasher {
+
+	private final long id;
+	private final String content;
+
+	public Hasher(long id, String content) {
+		this.id = id;
+		this.content = content;
+	}
+
+	public long getId() {
+		return id;
+	}
+
+	public String getContent() {
+		return content;
+	}
+}

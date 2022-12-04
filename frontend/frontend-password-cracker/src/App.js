@@ -8,6 +8,7 @@ function handleGenerate() {
 
 function App() {  
   console.log('app created');
+
   return (
     <div className="App">
       {/* <header className="App-header">
