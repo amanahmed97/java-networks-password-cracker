@@ -14,7 +14,7 @@ public class HasherController {
 	private final AtomicLong counter = new AtomicLong();
 
 	@GetMapping("/crack")
-	public Dictionary greeting(@RequestParam(value = "hash", defaultValue = "password") String hash) {
+	public Dictionary cracker(@RequestParam(value = "hash", defaultValue = "password") String hash) {
 		
 		// return new Greeting(counter.incrementAndGet(), String.format(template, hash));
 		// String name1 = "greeting";
@@ -23,6 +23,7 @@ public class HasherController {
 		Dictionary response = new Hashtable();
 		response.put("hash", hash);
 		response.put("password", "password-cracked");
+
 		return response;
 	}
 }

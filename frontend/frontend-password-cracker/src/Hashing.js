@@ -14,7 +14,7 @@ function generateHash() {
       document.getElementById('hashDisplay').innerHTML = "MD5 Hash: "+md5(password);
       
       // API call
-      fetch('/greeting')
+      fetch(`/crack?hash=${password}`)
        .then((response) => response.json())
        .then((data) => {
         console.log("data");
