@@ -24,51 +24,98 @@ public class HasherController {
 		String HOSTNAME = "localhost";
 		int PORT = 9090;
 		String password;
+		String line;
 
 		// Connect to server		
+// 			Socket clientSocket = new Socket(HOSTNAME, PORT);
+
+// 			InputStreamReader isr = new InputStreamReader(clientSocket.getInputStream());
+// 			BufferedReader in = new BufferedReader(isr);
+// 			PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
+
+//             {
+
+//                 System.out.println("Connected to " + HOSTNAME + " on port " + PORT);
+//                 System.out.println("Choose if you want to connect this user for ");
+// //            String Mode = in.readLine();
+//                 String data = "Making First Connection";
+//                 String SelectMode;
+//                 System.out.println("Sending to server:\n" + data);
+// //                out.println(data);
+// //
+//                 String line;
+// ////first phase
+// //                while ((line = in.readLine()) != null) { //Making tcp Connection
+// //                    System.out.println("TCP Connection Made : Client received: " + line);
+// //                    break;
+// //                }
+// //                System.out.println("TCP Connection Successful now waiting For Checking Password."); // When the server replies the first time we move to First Phase for sending the message
+// ////HASH REQUEST
+//                 //second phase
+//                 password = "ABCDE";
+//                 // String Hash = getHashValue(password);
+//                 out.println(hash);
+
+//                 while (!(line = in.readLine()).equals(password)) { //Making tcp Connection
+
+
+//                 }
+//                 System.out.println("Password for the Following Hash is : " + line);
+
+
+//         }        
+
+		try (
+
 			Socket clientSocket = new Socket(HOSTNAME, PORT);
 
 			InputStreamReader isr = new InputStreamReader(clientSocket.getInputStream());
 			BufferedReader in = new BufferedReader(isr);
 			PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
 
-            {
-
-                System.out.println("Connected to " + HOSTNAME + " on port " + PORT);
-                System.out.println("Choose if you want to connect this user for ");
-//            String Mode = in.readLine();
-                String data = "Making First Connection";
-                String SelectMode;
-                System.out.println("Sending to server:\n" + data);
-//                out.println(data);
-//
-                String line;
-////first phase
-//                while ((line = in.readLine()) != null) { //Making tcp Connection
-//                    System.out.println("TCP Connection Made : Client received: " + line);
-//                    break;
-//                }
-//                System.out.println("TCP Connection Successful now waiting For Checking Password."); // When the server replies the first time we move to First Phase for sending the message
-////HASH REQUEST
-                //second phase
-                password = "ABCDE";
-                // String Hash = getHashValue(password);
-                out.println(hash);
-
-                while (!(line = in.readLine()).equals(password)) { //Making tcp Connection
+		) {
 
 
-                }
-                System.out.println("Password for the Following Hash is : " + line);
+		System.out.println("Connected to " + HOSTNAME + " on port " + PORT);
+		System.out.println("Choose if you want to connect this user for ");
+	//            String Mode = in.readLine();
+		String data = "Making First Connection";
+		String SelectMode;
+		System.out.println("Sending to server:\n" + data);
+	//                out.println(data);
+	//
+		// String line;	
 
+		// password = "ABBBE";
+		int numberOfClients =2;
+		// String Hash = getHashValue(password);
+		String newHash = hash +" "+ numberOfClients;
+		out.println(newHash);
+		line = in.readLine();
+		while(line == null){
 
-        }        
+		}
+
+		// while(line != null){
+		// 	while(!line.equals(password) ){
+
+		// 	}
+		// 	if(line.equals(password)){
+		// 		break ;
+		// 	}
+
+		// }
+
+			System.out.println("Password for the Following Hash is : " + line);
+
+		}
 
 
 		Dictionary response = new Hashtable();
 		response.put("hash", hash);
-		response.put("password", password);
+		response.put("password", line);
 
 		return response;
 	}
+
 }

@@ -145,6 +145,7 @@ public class ClientHandler implements Runnable{
 
 
                 clients.get(index).out.println(RenewedHash);
+                client.out.flush();
 
 
 
@@ -155,6 +156,7 @@ public class ClientHandler implements Runnable{
     private void outToAll(String message) {
         for(ClientHandler client : clients){
             client.out.println(message);
+            client.out.flush();
 
         }
 
