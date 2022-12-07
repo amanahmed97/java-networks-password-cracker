@@ -1,5 +1,7 @@
+import java.math.BigInteger;
 import java.net.*;
 import java.io.*;
+import java.security.MessageDigest;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
@@ -8,51 +10,53 @@ import java.util.regex.Matcher;
 
 public class Worker {
     static int workerId;
+    static int numberWorkers = 2;
+    static int[] workerPorts = {1112, 1113};
 
-    public static void main(String [] args) throws IOException, InterruptedException {
-        int[] workerPorts = {1112,1113};
-
+    public static void main(String[] args) throws IOException, InterruptedException {
         Scanner ip = new Scanner(System.in);
         System.out.println("Worker Starting");
         System.out.print("Enter Worker Id : ");
         workerId = ip.nextInt();
-        int port = workerPorts[workerId-1];
+        int port = workerPorts[workerId - 1];
 
         // Server Socket created
         ServerSocket ss = new ServerSocket(port);
-        System.out.println("Worker running on port : "+port);
-        int tcount=0;
+        System.out.println("Worker running on port : " + port);
+        int tcount = 0;
 
         int numberWorkers = 2;
-        System.out.println("Number of Workers : "+numberWorkers);
+        System.out.println("Number of Workers : " + numberWorkers);
 
-        while(true){
+        while (true) {
             // Socket open TCP connection
             Socket cs1 = ss.accept();
             tcount++;
-            new WorkerRun("Thread "+tcount,cs1).start();
+            new WorkerRun("Thread " + tcount, cs1).start();
         }
 
     }
 }
 
 
-class WorkerRun extends Thread{
+class WorkerRun extends Thread {
     Socket cs;
     String t_name;
-    public WorkerRun(String name, Socket cs1){
+
+    public WorkerRun(String name, Socket cs1) {
         this.cs = cs1;
         t_name = name;
     }
+
     public void run() {
         // Initialize variables
-        System.out.println("\n\nTHREAD NAME : "+t_name+"\n\n");
+        System.out.println("\n\nTHREAD NAME : " + t_name + "\n\n");
         String clientMessage;
         String serverMessage;
         String requestType;
         String hash = new String();
-        int requestId=0;
-        String cracked;
+        int requestId = 0;
+        String cracked = "null";
         String response200 = "200 OK: Ready";
         String response404 = "404 ERROR: Invalid Connection Setup Message";
         String response200Close = "200 OK: Closing Connection";
@@ -108,16 +112,9 @@ class WorkerRun extends Thread{
 
         // Decode Hash
         if (serverMessage.equals(response200)) {
-            System.out.println("Hash Received : "+hash);
+            System.out.println("Hash Received : " + hash);
             System.out.println("Decoding Hash");
-            if(Worker.workerId == 1) {
-                try {
-//                    Thread.sleep(100000);
-                    TimeUnit.SECONDS.sleep(15);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-            }
+            cracked = crackPassword(hash);
         } else {
             System.out.println("Connection close");
             try {
@@ -129,9 +126,7 @@ class WorkerRun extends Thread{
 
         // Send cracked password back to Server
         try {
-//            String cracked = "cracked password : TRYING";
-            cracked = "TRYING"+Worker.workerId;
-            System.out.println("CRACKED : "+cracked);
+            System.out.println("CRACKED : " + cracked);
             outToClient.writeBytes(cracked + "\n");
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -146,6 +141,69 @@ class WorkerRun extends Thread{
         }
 
     }
+
+    public String crackPassword(String hash) {
+        String constructedPassword = "null";
+        char[] passwordFromHash = new char[5];
+
+        // Define all characters needed
+        char[] allCharactersNeeded = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T',
+                'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't',
+                'u', 'v', 'w', 'x', 'y', 'z'};
+
+        // Run loops to match
+        for (int i = Worker.workerId - 1; i < allCharactersNeeded.length; i += Worker.numberWorkers) {
+            passwordFromHash[0] = allCharactersNeeded[i];
+
+            for (int j = 0; j < allCharactersNeeded.length; j++) {
+                passwordFromHash[1] = allCharactersNeeded[j];
+
+                for (int k = 0; k < allCharactersNeeded.length; k++) {
+                    passwordFromHash[2] = allCharactersNeeded[k];
+
+                    for (int l = 0; l < allCharactersNeeded.length; l++) {
+                        passwordFromHash[3] = allCharactersNeeded[l];
+
+                        for (int m = 0; m < allCharactersNeeded.length; m++) {
+                            passwordFromHash[4] = allCharactersNeeded[m];
+
+                            constructedPassword = String.copyValueOf(passwordFromHash);
+                            System.out.println(constructedPassword);
+                            String constructedHash = getHashValue(constructedPassword);
+
+                            if (hash.equals(constructedHash)) {
+                                System.out.println("PASSWORD CRACKED : "+constructedPassword);
+                                System.out.println("Password Generated from Hash is " + constructedPassword);
+                                return constructedPassword;
+//                                break OUTER;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+
+        return "null";
+    }
+
+    public static String getHashValue(String password) {
+        String HashGenerated = null;
+        try {
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            byte[] messageDigest = md.digest(password.getBytes());
+            BigInteger bigInt = new BigInteger(1, messageDigest);
+            HashGenerated = bigInt.toString(16);
+            if (HashGenerated.length() < 32) {
+                HashGenerated = '0' + HashGenerated;
+            }
+            System.out.println("Hash : " +HashGenerated);
+        } catch (Exception e) {
+            System.out.println("Exception :" + e);
+        }
+        return HashGenerated;
+    }
+
 }
 
 
