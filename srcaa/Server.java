@@ -122,21 +122,21 @@ class ServerRun extends Thread{
             }
         }
 
-        // Send cracked password back to client
-        try {
-            String crackedOutput = "cracked password : "+cracked;
-            outToClient.writeBytes(crackedOutput + "\n");
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        // CTP
-        System.out.println("Connection close");
-        try {
-            cs.close();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+//        // Send cracked password back to client
+//        try {
+//            String crackedOutput = "cracked password : "+cracked;
+//            outToClient.writeBytes(crackedOutput + "\n");
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        }
+//
+//        // CTP
+//        System.out.println("Connection close");
+//        try {
+//            cs.close();
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        }
 
     }
 
@@ -172,18 +172,88 @@ class ServerRun extends Thread{
             String csp_init = phase + sp + rType + sp + hash + sp + count + newLine;
             System.out.println("\nCSP : " + csp_init);
             outToWorkers[i].writeBytes(csp_init);
-            workerResponse = inFromWorkers[i].readLine();
-            System.out.println("Worker Response : " + workerResponse + "\n");
 
-            if (!workerResponse.equals("200 OK: Ready")) workerSockets[i].close();
+        }
 
-            System.out.println("Connection Close\n\n\n");
-            workerSockets[i].close();
+        // Server receives cracked password from Workers
+        for(int i=0; i<Server.numberWorkers; i++){
 
+            new WorkerResponseRun("Worker Response Thread "+i,i,cs,workerSockets,outToWorkers,inFromWorkers).start();
         }
 
         return workerResponse;
     }
+
+}
+
+class WorkerResponseRun extends Thread{
+    Socket cs;
+    int workerRunId;
+    String t_name;
+    Socket[] workerSockets;
+    DataOutputStream[] outToWorkers;
+    BufferedReader[] inFromWorkers;
+
+    public WorkerResponseRun(String name, int workerRunId, Socket cs1, Socket[] workerSockets,
+                             DataOutputStream[] outToWorkers, BufferedReader[] inFromWorkers){
+        this.cs = cs1;
+        this.workerRunId = workerRunId;
+        t_name = name;
+        this.workerSockets = workerSockets;
+        this.outToWorkers = outToWorkers;
+        this.inFromWorkers = inFromWorkers;
+    }
+
+    public void run() {
+        String workerResponse = "null";
+
+        try {
+            workerResponse = inFromWorkers[workerRunId].readLine();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        System.out.println("Worker Response : " + workerResponse + "\n");
+
+        // Send cracked password back to client
+        if(!workerResponse.equals("null")){
+            try {
+                DataOutputStream outToClient = null;
+                outToClient = new DataOutputStream(cs.getOutputStream());
+
+                String crackedOutput = "cracked password : " + workerResponse;
+                outToClient.writeBytes(crackedOutput + "\n");
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        // CTP - Close client connection
+        System.out.println("Connection close");
+        try {
+            cs.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+
+        // Close worker connections
+        if (!workerResponse.equals("200 OK: Ready")) {
+            try {
+                workerSockets[workerRunId].close();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        System.out.println("Connection worker "+(workerRunId+1)+" Close\n\n\n");
+        try {
+            workerSockets[workerRunId].close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
 }
 
 

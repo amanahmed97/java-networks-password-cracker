@@ -1,6 +1,7 @@
 import java.net.*;
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
@@ -109,6 +110,14 @@ class WorkerRun extends Thread{
         if (serverMessage.equals(response200)) {
             System.out.println("Hash Received : "+hash);
             System.out.println("Decoding Hash");
+            if(Worker.workerId == 1) {
+                try {
+//                    Thread.sleep(100000);
+                    TimeUnit.SECONDS.sleep(15);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
         } else {
             System.out.println("Connection close");
             try {
