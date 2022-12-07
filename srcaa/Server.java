@@ -153,6 +153,9 @@ class ServerRun extends Thread{
         String newLine ="\n";
         int count=1;
         String workerResponse = "null";
+        Socket[] workerSockets = new Socket[Server.numberWorkers];
+        DataOutputStream[] outToWorkers = new DataOutputStream[Server.numberWorkers];
+        BufferedReader[] inFromWorkers = new BufferedReader[Server.numberWorkers];
 
         // Server as a client sends hash to Workers
         for(int i=0; i<Server.numberWorkers; i++){
@@ -160,22 +163,22 @@ class ServerRun extends Thread{
             // Connection
             port = Server.workerPorts[i];
             System.out.println("\nConnecting to worker "+(i+1)+" : "+host+" : "+port);
-            Socket workerSocket = new Socket(host, port);
+            workerSockets[i] = new Socket(host, port);
 
             // TCP Connection
-            DataOutputStream outToWorker = new DataOutputStream(workerSocket.getOutputStream());
-            BufferedReader inFromWorker = new BufferedReader(new InputStreamReader(workerSocket.getInputStream()));
+            outToWorkers[i] = new DataOutputStream(workerSockets[i].getOutputStream());
+            inFromWorkers[i] = new BufferedReader(new InputStreamReader(workerSockets[i].getInputStream()));
 
             String csp_init = phase + sp + rType + sp + hash + sp + count + newLine;
             System.out.println("\nCSP : " + csp_init);
-            outToWorker.writeBytes(csp_init);
-            workerResponse = inFromWorker.readLine();
+            outToWorkers[i].writeBytes(csp_init);
+            workerResponse = inFromWorkers[i].readLine();
             System.out.println("Worker Response : " + workerResponse + "\n");
 
-            if (!workerResponse.equals("200 OK: Ready")) workerSocket.close();
+            if (!workerResponse.equals("200 OK: Ready")) workerSockets[i].close();
 
             System.out.println("Connection Close\n\n\n");
-            workerSocket.close();
+            workerSockets[i].close();
 
         }
 

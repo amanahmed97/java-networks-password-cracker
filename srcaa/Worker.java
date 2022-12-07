@@ -122,6 +122,7 @@ class WorkerRun extends Thread{
         try {
 //            String cracked = "cracked password : TRYING";
             cracked = "TRYING"+Worker.workerId;
+            System.out.println("CRACKED : "+cracked);
             outToClient.writeBytes(cracked + "\n");
         } catch (IOException e) {
             throw new RuntimeException(e);
