@@ -67,13 +67,14 @@ public class Client{
 
         String csp_init = phase + sp + rType + sp + hash + sp + useWorkers + newLine;
         System.out.println("\nCSP : " + csp_init);
-        long startTime = System.currentTimeMillis();
+        double startTime = System.currentTimeMillis();
         outToServer.writeBytes(csp_init);
         serverResponse = inFromServer.readLine();
-        long endTime = System.currentTimeMillis();
+        double endTime = System.currentTimeMillis();
 
         System.out.println("Server Response :\nCracked Password : " + serverResponse + "\n");
         System.out.println("Time taken for response : "+(endTime-startTime)+" ms");
+        System.out.println("Time taken for response : "+(endTime-startTime)/1000+" seconds");
 
         if (!serverResponse.equals("200 OK: Ready")) clientSocket.close();
 
