@@ -172,13 +172,16 @@ class ServerRun extends Thread{
             String csp_init = phase + sp + rType + sp + hash + sp + count + newLine;
             System.out.println("\nCSP : " + csp_init);
             outToWorkers[i].writeBytes(csp_init);
+//            outToWorkers[i].writeBytes("w quit\n");
+            outToWorkers[i].flush();
 
         }
 
         // Server receives cracked password from Workers
         for(int i=0; i<Server.numberWorkers; i++){
-
-            new WorkerResponseRun("Worker Response Thread "+i,i,cs,workerSockets,outToWorkers,inFromWorkers).start();
+            WorkerResponseRun thread = new WorkerResponseRun("Worker Response Thread "+i,i,cs,workerSockets,outToWorkers,inFromWorkers);
+            WorkerResponseRun.workerResponseRunThreads.add(thread);
+            thread.start();
         }
 
         return workerResponse;
@@ -193,6 +196,7 @@ class WorkerResponseRun extends Thread{
     Socket[] workerSockets;
     DataOutputStream[] outToWorkers;
     BufferedReader[] inFromWorkers;
+    static ArrayList<WorkerResponseRun> workerResponseRunThreads = new ArrayList<WorkerResponseRun>();
 
     public WorkerResponseRun(String name, int workerRunId, Socket cs1, Socket[] workerSockets,
                              DataOutputStream[] outToWorkers, BufferedReader[] inFromWorkers){
@@ -212,10 +216,10 @@ class WorkerResponseRun extends Thread{
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        System.out.println("Worker Response : " + workerResponse + "\n");
+        System.out.println("Worker "+(workerRunId+1)+" Response : " + workerResponse + "\n");
 
         // Send cracked password back to client
-        if(!workerResponse.equals("null")){
+        if(workerResponse!=null || !workerResponse.equals("null")){
             try {
                 DataOutputStream outToClient = null;
                 outToClient = new DataOutputStream(cs.getOutputStream());
@@ -225,6 +229,31 @@ class WorkerResponseRun extends Thread{
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
+
+            // Stop all other workers from decoding hash as already cracked
+            for (int i=0;i<Server.numberWorkers;i++){
+                if (i==workerRunId)
+                    continue;
+                String phase="w";
+                String qType = "quit";
+                String sp=" ";
+                String newLine ="\n";
+                String requestQuit = phase+sp+qType+newLine;
+                requestQuit = "w quit\n";
+                try {
+                    workerResponseRunThreads.get(i).interrupt();
+//                    outToWorkers[i].writeBytes(requestQuit);
+                    workerSockets[i] = new Socket("localhost", 1112);
+                    outToWorkers[i] = new DataOutputStream(workerSockets[i].getOutputStream());
+                    outToWorkers[i].writeBytes(requestQuit);
+                    System.out.println("requestQuit : "+requestQuit);
+                    workerSockets[i].close();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
+
         }
 
         // CTP - Close client connection

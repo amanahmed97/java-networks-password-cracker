@@ -45,7 +45,9 @@ public class Client{
 
         // CSP
         count = 1;
-        hash = "078ed3bfbe6f511d788aad9995ecccf6";
+//        hash = "078ed3bfbe6f511d788aad9995ecccf6";
+//        hash = "c436518fa5ab879dd2e9eb01a419c609";
+        hash = "022c42348345525cf3afc06f46c242b4";
 
         String csp_init = phase + sp + rType + sp + hash + sp + count + newLine;
         System.out.println("\nCSP : " + csp_init);

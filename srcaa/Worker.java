@@ -12,6 +12,7 @@ public class Worker {
     static int workerId;
     static int numberWorkers = 2;
     static int[] workerPorts = {1112, 1113};
+    static ArrayList<WorkerRun> workerRunThreads = new ArrayList<WorkerRun>();
 
     public static void main(String[] args) throws IOException, InterruptedException {
         Scanner ip = new Scanner(System.in);
@@ -32,7 +33,11 @@ public class Worker {
             // Socket open TCP connection
             Socket cs1 = ss.accept();
             tcount++;
-            new WorkerRun("Thread " + tcount, cs1).start();
+//            WorkerRun thread = new WorkerRun("Thread " + tcount, cs1);
+//            workerRunThreads.add(thread);
+            workerRunThreads.add(new WorkerRun("Thread " + tcount, cs1));
+            workerRunThreads.get(workerRunThreads.size()-1).start();
+//            thread.start();
         }
 
     }
@@ -79,6 +84,7 @@ class WorkerRun extends Thread {
         // Get the Hash
         try {
             clientMessage = inFromClient.readLine();
+            System.out.println(clientMessage);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -106,9 +112,39 @@ class WorkerRun extends Thread {
             serverMessage = response200;
 
         } else {
+            System.out.println("Else Stopping");
+//            System.exit(0);
             serverMessage = response404;
+            String quitRequest = "w(\\s)(quit)";
+            pattern = Pattern.compile(quitRequest);
+            matcher = pattern.matcher(clientMessage);
+            matchFound = matcher.find();
+            // Stop all threads
+            if(matchFound) {
+                System.out.println("Stopping worker threads");
+//                System.exit(0);
+                for (WorkerRun workerThread: Worker.workerRunThreads)
+                    workerThread.interrupt();
+            }
+
         }
         System.out.println("Worker Response : " + serverMessage);
+
+        // If quit request received
+        if (serverMessage.equals(response404)) {
+            String quitRequest = "w(\\s)(quit)";
+            pattern = Pattern.compile(quitRequest);
+            matcher = pattern.matcher(clientMessage);
+            matchFound = matcher.find();
+            // Stop all threads
+            if(matchFound) {
+                System.out.println("Stopping worker threads");
+//                System.exit(0);
+//                for (WorkerRun workerThread: Worker.workerRunThreads)
+//                    workerThread.interrupt();
+            }
+
+        }
 
         // Decode Hash
         if (serverMessage.equals(response200)) {
