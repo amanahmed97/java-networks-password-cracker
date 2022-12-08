@@ -19,7 +19,8 @@ public class HasherController {
 	private final AtomicLong counter = new AtomicLong();
 
 	@GetMapping("/crack")
-	public Dictionary cracker(@RequestParam(value = "hash", defaultValue = "password") String hash) throws IOException{				
+	public Dictionary cracker(@RequestParam(value = "hash", defaultValue = "password") String hash,
+	@RequestParam(value = "useworkers", defaultValue = "2") int useWorkers) throws IOException{
 		
 		String HOSTNAME = "localhost";
 		int PORT = 9090;
@@ -60,7 +61,7 @@ public class HasherController {
 		 // CSP
 		 count = 2;		 
  
-		 String csp_init = phase + sp + rType + sp + hash + sp + count + newLine;
+		 String csp_init = phase + sp + rType + sp + hash + sp + useWorkers + newLine;
 		 System.out.println("\nCSP : " + csp_init);
 		 outToServer.writeBytes(csp_init);
 		 serverResponse = inFromServer.readLine();

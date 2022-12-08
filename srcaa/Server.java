@@ -137,6 +137,9 @@ class ServerRun extends Thread{
             requestType = messageArray[1];
             hash = messageArray[2];
             useWorkers = Integer.parseInt(messageArray[3]);
+            if(useWorkers>Server.numberWorkers)
+                useWorkers = Server.numberWorkers;
+            
             serverMessage = response200;
 
         } else {
