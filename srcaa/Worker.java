@@ -9,23 +9,26 @@ import java.util.regex.Matcher;
 
 
 public class Worker {
-    static int workerId;
+    static int workerId=0;
     static int numberWorkers = 2;
     static int[] workerPorts = {1112, 1113};
 
     public static void main(String[] args) throws IOException, InterruptedException {
         Scanner ip = new Scanner(System.in);
         System.out.println("Worker Starting");
+
         System.out.print("Enter Worker Id : ");
         workerId = ip.nextInt();
-        int port = workerPorts[workerId - 1];
+
+        System.out.println("Worker Id : "+workerId);
+
+        int port = workerPorts[workerId];
 
         // Server Socket created
         ServerSocket ss = new ServerSocket(port);
         System.out.println("Worker running on port : " + port);
         int tcount = 0;
 
-        int numberWorkers = 2;
         System.out.println("Number of Workers : " + numberWorkers);
 
         while (true) {
@@ -42,6 +45,7 @@ public class Worker {
 class WorkerRun extends Thread {
     Socket cs;
     String t_name;
+    static int useWorkers=2;
 
     public WorkerRun(String name, Socket cs1) {
         this.cs = cs1;
@@ -102,7 +106,7 @@ class WorkerRun extends Thread {
             String[] messageArray = clientMessage.split(" ");
             requestType = messageArray[1];
             hash = messageArray[2];
-            requestId = Integer.parseInt(messageArray[3]);
+            useWorkers = Integer.parseInt(messageArray[3]);
             serverMessage = response200;
 
         } else {
@@ -152,7 +156,7 @@ class WorkerRun extends Thread {
                 'u', 'v', 'w', 'x', 'y', 'z'};
 
         // Run loops to match
-        for (int i = Worker.workerId - 1; i < allCharactersNeeded.length; i += Worker.numberWorkers) {
+        for (int i = Worker.workerId; i < allCharactersNeeded.length; i += WorkerRun.useWorkers) {
             passwordFromHash[0] = allCharactersNeeded[i];
 
             for (int j = 0; j < allCharactersNeeded.length; j++) {
@@ -174,6 +178,7 @@ class WorkerRun extends Thread {
                             if (hash.equals(constructedHash)) {
                                 System.out.println("PASSWORD CRACKED : "+constructedPassword);
                                 System.out.println("Password Generated from Hash is " + constructedPassword);
+
                                 return constructedPassword;
 //                                break OUTER;
                             }

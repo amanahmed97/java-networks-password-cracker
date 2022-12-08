@@ -10,13 +10,10 @@ public class Client{
         // Initialize message variables
         String phase="r";
         String rType = "hash";
-        int message_size=10;
         String sp=" ";
         String newLine ="\n";
-        int count=1;
-        int probes=10;
-        String mp_message;
-        String payload;
+        int useWorkers=1;
+        int totalWorkers=1;
         String ctp_init;
         String hash;
 
@@ -43,15 +40,40 @@ public class Client{
         DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
         BufferedReader inFromServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 
-        // CSP
-        count = 1;
-        hash = "078ed3bfbe6f511d788aad9995ecccf6";
-
-        String csp_init = phase + sp + rType + sp + hash + sp + count + newLine;
-        System.out.println("\nCSP : " + csp_init);
-        outToServer.writeBytes(csp_init);
+        // Get number of available workers
+        String cnum_init = "n workers" + newLine;
+        System.out.println("\nCNUM : " + cnum_init);
+        outToServer.writeBytes(cnum_init);
+        outToServer.flush();
         serverResponse = inFromServer.readLine();
         System.out.println("Server Response : " + serverResponse + "\n");
+        totalWorkers = Integer.parseInt(serverResponse);
+        System.out.println("Total available workers : "+totalWorkers);
+        System.out.println("Close connection");
+        clientSocket.close();
+
+        // CSP
+        clientSocket = new Socket(host, port);
+        outToServer = new DataOutputStream(clientSocket.getOutputStream());
+        inFromServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+
+        useWorkers = 2;
+        hash = "078ed3bfbe6f511d788aad9995ecccf6";
+        System.out.println("Enter number of workers to use : ");
+        Scanner ip = new Scanner(System.in);
+        useWorkers = ip.nextInt();
+        if(useWorkers>totalWorkers)
+            useWorkers=totalWorkers;
+
+        String csp_init = phase + sp + rType + sp + hash + sp + useWorkers + newLine;
+        System.out.println("\nCSP : " + csp_init);
+        long startTime = System.currentTimeMillis();
+        outToServer.writeBytes(csp_init);
+        serverResponse = inFromServer.readLine();
+        long endTime = System.currentTimeMillis();
+
+        System.out.println("Server Response :\nCracked Password : " + serverResponse + "\n");
+        System.out.println("Time taken for response : "+(endTime-startTime)+" ms");
 
         if (!serverResponse.equals("200 OK: Ready")) clientSocket.close();
 

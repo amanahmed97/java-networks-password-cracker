@@ -40,6 +40,7 @@ public class Server {
 class ServerRun extends Thread{
     Socket cs;
     String t_name;
+    static int useWorkers=2;
 
     public ServerRun(String name, Socket cs1){
         this.cs = cs1;
@@ -53,7 +54,7 @@ class ServerRun extends Thread{
         String requestType;
         String hash = new String();
         String cracked = new String();
-        int requestId=0;
+        useWorkers=2;
         String response200 = "200 OK: Ready";
         String response404 = "404 ERROR: Invalid Connection Setup Message";
         String response200Close = "200 OK: Closing Connection";
@@ -73,7 +74,7 @@ class ServerRun extends Thread{
             throw new RuntimeException(e);
         }
 
-        // Get the Hash
+        // Get the request
         try {
             clientMessage = inFromClient.readLine();
         } catch (IOException e) {
@@ -89,16 +90,53 @@ class ServerRun extends Thread{
             }
         }
 
-        String request = "r(\\s)(hash)(\\s)[a-f0-9]{32}(\\s)(\\d+)";
+        // Respond to request for number of workers available
+        String request = "n(\\s)(workers)";
         Pattern pattern = Pattern.compile(request);
         Matcher matcher = pattern.matcher(clientMessage);
         boolean matchFound = matcher.find();
+        if (matchFound) {
+            System.out.println("Request Number of Workers available\n");
+            // Send number of workers to client
+            try {
+                outToClient.writeBytes(String.valueOf(Server.numberWorkers)+"\n");
+                outToClient.flush();
+                cs.close();
+                return;
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+//            // Get the Hash, do readLine again
+//            try {
+//                clientMessage = inFromClient.readLine();
+//            } catch (IOException e) {
+//                throw new RuntimeException(e);
+//            }
+//            System.out.println("Client Message : " + clientMessage);
+//            if (clientMessage == null) {
+//                System.out.println("Connection Close");
+//                try {
+//                    cs.close();
+//                } catch (IOException e) {
+//                    throw new RuntimeException(e);
+//                }
+//            }
+
+        }
+
+
+        // Handle request for cracking password
+        request = "r(\\s)(hash)(\\s)[a-f0-9]{32}(\\s)(\\d+)";
+        pattern = Pattern.compile(request);
+        matcher = pattern.matcher(clientMessage);
+        matchFound = matcher.find();
         if (matchFound) {
             System.out.println("Request Init\n");
             String[] messageArray = clientMessage.split(" ");            
             requestType = messageArray[1];
             hash = messageArray[2];
-            requestId = Integer.parseInt(messageArray[3]);
+            useWorkers = Integer.parseInt(messageArray[3]);
             serverMessage = response200;
 
         } else {
@@ -158,7 +196,7 @@ class ServerRun extends Thread{
         BufferedReader[] inFromWorkers = new BufferedReader[Server.numberWorkers];
 
         // Server as a client sends hash to Workers
-        for(int i=0; i<Server.numberWorkers; i++){
+        for(int i=0; i<useWorkers; i++){
 
             // Connection
             port = Server.workerPorts[i];
@@ -169,14 +207,14 @@ class ServerRun extends Thread{
             outToWorkers[i] = new DataOutputStream(workerSockets[i].getOutputStream());
             inFromWorkers[i] = new BufferedReader(new InputStreamReader(workerSockets[i].getInputStream()));
 
-            String csp_init = phase + sp + rType + sp + hash + sp + count + newLine;
+            String csp_init = phase + sp + rType + sp + hash + sp + ServerRun.useWorkers + newLine;
             System.out.println("\nCSP : " + csp_init);
             outToWorkers[i].writeBytes(csp_init);
 
         }
 
         // Server receives cracked password from Workers
-        for(int i=0; i<Server.numberWorkers; i++){
+        for(int i=0; i<useWorkers; i++){
 
             new WorkerResponseRun("Worker Response Thread "+i,i,cs,workerSockets,outToWorkers,inFromWorkers).start();
         }
@@ -221,7 +259,8 @@ class WorkerResponseRun extends Thread{
                 outToClient = new DataOutputStream(cs.getOutputStream());
 
                 String crackedOutput = "cracked password : " + workerResponse;
-                outToClient.writeBytes(crackedOutput + "\n");
+                System.out.println("Sending : "+workerResponse);
+                outToClient.writeBytes(workerResponse + "\n");
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -237,14 +276,15 @@ class WorkerResponseRun extends Thread{
 
 
         // Close worker connections
-        if (!workerResponse.equals("200 OK: Ready")) {
-            try {
-                workerSockets[workerRunId].close();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
+//        if (!workerResponse.equals("200 OK: Ready")) {
+//            try {
+//                workerSockets[workerRunId].close();
+//            } catch (IOException e) {
+//                throw new RuntimeException(e);
+//            }
+//        }
 
+        // Close worker connections
         System.out.println("Connection worker "+(workerRunId+1)+" Close\n\n\n");
         try {
             workerSockets[workerRunId].close();

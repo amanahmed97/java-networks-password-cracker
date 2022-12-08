@@ -26,6 +26,68 @@ public class HasherController {
 		String password;
 		String line;
 
+		 // Initialize message variables
+		 String phase="r";
+		 String rType = "hash";
+		 int message_size=10;
+		 String sp=" ";
+		 String newLine ="\n";
+		 int count=1;
+		 int probes=10;
+		 String mp_message;
+		 String payload;
+		 String ctp_init;		 
+ 
+		 String clientInput;
+		 String serverResponse;
+ 
+		 System.out.println("Client Starting");
+ 
+		 BufferedReader userInput = new BufferedReader(new InputStreamReader(System.in));
+ 		
+		 String host = "localhost";		
+		 int port = 1111;
+		 System.out.println("\nConnecting to server : "+host+" : "+port);
+ 
+ 
+		 // Begin connection with Server
+		 Socket clientSocket = new Socket(host, port);
+ 
+		 // TCP Connection
+		 DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
+		 BufferedReader inFromServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+ 
+		 // CSP
+		 count = 2;		 
+ 
+		 String csp_init = phase + sp + rType + sp + hash + sp + count + newLine;
+		 System.out.println("\nCSP : " + csp_init);
+		 outToServer.writeBytes(csp_init);
+		 serverResponse = inFromServer.readLine();
+		 System.out.println("Server Response : " + serverResponse + "\n");
+ 
+		 if (!serverResponse.equals("200 OK: Ready")) clientSocket.close(); 
+ 
+		 System.out.println("Connection Close\n\n\n");
+		 clientSocket.close();
+
+
+		Dictionary response = new Hashtable();
+		response.put("hash", hash);
+		response.put("password", serverResponse);
+
+		return response;
+	}
+
+
+	@GetMapping("/crackv0")
+	public Dictionary crackerV0(@RequestParam(value = "hash", defaultValue = "password") String hash) throws IOException{				
+		
+		String HOSTNAME = "localhost";
+		int PORT = 9090;
+		String password;
+		String line;
+
 		// Connect to server		
 // 			Socket clientSocket = new Socket(HOSTNAME, PORT);
 
