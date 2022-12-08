@@ -7,9 +7,9 @@ import java.util.regex.Matcher;
 
 public class Server {
 
-    static int numberWorkers=2;
-    static int[] workerPorts = {1112,1113};
-    static String[] workerHosts = {"localhost","localhost"};
+    static int numberWorkers=4;
+    static int[] workerPorts = {1112, 1113, 1114, 1115};
+    static String[] workerHosts = {"pcvm5-9.geni.uchicago.edu","pcvm5-10.geni.uchicago.edu","pcvm5-11.geni.uchicago.edu","pcvm5-12.geni.uchicago.edu"};
 
     public static void main(String [] args) throws IOException, InterruptedException {
 

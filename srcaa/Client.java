@@ -30,12 +30,15 @@ public class Client{
         System.out.print("Enter port number for server : ");
 //        int port = Integer.parseInt(userInput.readLine());
         int port = 1111;
+        host = "pcvm5-13.geni.uchicago.edu";
+//        host = "694e-165-230-161-200.ngrok.io";
+//        host = "172.17.1.27";
         System.out.println("\nConnecting to server : "+host+" : "+port);
 
 
         // Begin connection with Server
         Socket clientSocket = new Socket(host, port);
-
+        System.out.println("open socket");
         // TCP Connection
         DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
         BufferedReader inFromServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
@@ -58,7 +61,8 @@ public class Client{
         inFromServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 
         useWorkers = 2;
-        hash = "078ed3bfbe6f511d788aad9995ecccf6";
+//        hash = "078ed3bfbe6f511d788aad9995ecccf6";
+        hash = "7efc5160dc70371bebfebfaee8867447";
         System.out.println("Enter number of workers to use : ");
         Scanner ip = new Scanner(System.in);
         useWorkers = ip.nextInt();

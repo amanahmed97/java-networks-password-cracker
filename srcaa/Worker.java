@@ -10,15 +10,15 @@ import java.util.regex.Matcher;
 
 public class Worker {
     static int workerId=0;
-    static int numberWorkers = 2;
-    static int[] workerPorts = {1112, 1113};
+    static int numberWorkers = 4;
+    static int[] workerPorts = {1112, 1113, 1114, 1115};
 
     public static void main(String[] args) throws IOException, InterruptedException {
         Scanner ip = new Scanner(System.in);
         System.out.println("Worker Starting");
 
         System.out.print("Enter Worker Id : ");
-        workerId = ip.nextInt();
+        workerId = Integer.parseInt(args[0]);
 
         System.out.println("Worker Id : "+workerId);
 
