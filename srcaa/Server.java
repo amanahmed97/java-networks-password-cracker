@@ -7,8 +7,9 @@ import java.util.regex.Matcher;
 
 public class Server {
 
-    static int numberWorkers;
+    static int numberWorkers=2;
     static int[] workerPorts = {1112,1113};
+    static String[] workerHosts = {"localhost","localhost"};
 
     public static void main(String [] args) throws IOException, InterruptedException {
 
@@ -23,7 +24,7 @@ public class Server {
         System.out.println("Server running on port : "+port);
         int tcount=0;
 
-        numberWorkers = 2;
+//        numberWorkers = 2;
         System.out.println("Number of Workers : "+numberWorkers);
 
         while(true){
@@ -107,22 +108,6 @@ class ServerRun extends Thread{
                 throw new RuntimeException(e);
             }
 
-//            // Get the Hash, do readLine again
-//            try {
-//                clientMessage = inFromClient.readLine();
-//            } catch (IOException e) {
-//                throw new RuntimeException(e);
-//            }
-//            System.out.println("Client Message : " + clientMessage);
-//            if (clientMessage == null) {
-//                System.out.println("Connection Close");
-//                try {
-//                    cs.close();
-//                } catch (IOException e) {
-//                    throw new RuntimeException(e);
-//                }
-//            }
-
         }
 
 
@@ -163,22 +148,6 @@ class ServerRun extends Thread{
             }
         }
 
-//        // Send cracked password back to client
-//        try {
-//            String crackedOutput = "cracked password : "+cracked;
-//            outToClient.writeBytes(crackedOutput + "\n");
-//        } catch (IOException e) {
-//            throw new RuntimeException(e);
-//        }
-//
-//        // CTP
-//        System.out.println("Connection close");
-//        try {
-//            cs.close();
-//        } catch (IOException e) {
-//            throw new RuntimeException(e);
-//        }
-
     }
 
     public String sendHashWorkers(String hash) throws IOException{
@@ -203,6 +172,7 @@ class ServerRun extends Thread{
 
             // Connection
             port = Server.workerPorts[i];
+            host = Server.workerHosts[i];
             System.out.println("\nConnecting to worker "+(i+1)+" : "+host+" : "+port);
             workerSockets[i] = new Socket(host, port);
 
@@ -277,15 +247,6 @@ class WorkerResponseRun extends Thread{
             throw new RuntimeException(e);
         }
 
-
-        // Close worker connections
-//        if (!workerResponse.equals("200 OK: Ready")) {
-//            try {
-//                workerSockets[workerRunId].close();
-//            } catch (IOException e) {
-//                throw new RuntimeException(e);
-//            }
-//        }
 
         // Close worker connections
         System.out.println("Connection worker "+(workerRunId+1)+" Close\n\n\n");

@@ -79,13 +79,6 @@ public class Client{
         if (!serverResponse.equals("200 OK: Ready")) clientSocket.close();
 
         // CTP
-//        phase = "t";
-//        ctp_init = phase + newLine;
-//        System.out.println("CTP : " + ctp_init);
-//        outToServer.writeBytes(ctp_init);
-//        serverResponse = inFromServer.readLine();
-//        System.out.println("Server Response : " + serverResponse);
-
         System.out.println("Connection Close\n\n\n");
         clientSocket.close();
 
