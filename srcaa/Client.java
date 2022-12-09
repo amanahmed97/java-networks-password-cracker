@@ -12,8 +12,8 @@ public class Client{
         String rType = "hash";
         String sp=" ";
         String newLine ="\n";
-        int useWorkers=1;
-        int totalWorkers=1;
+        int useWorkers=2;
+        int totalWorkers=4;
         String ctp_init;
         String hash;
 
@@ -24,17 +24,19 @@ public class Client{
 
         BufferedReader userInput = new BufferedReader(new InputStreamReader(System.in));
 
-        System.out.print("Enter host name for server : ");
+//        System.out.print("Enter host name for server : ");
 //        String host = userInput.readLine();
         String host = "localhost";
-        System.out.print("Enter port number for server : ");
+//        System.out.print("Enter port number for server : ");
 //        int port = Integer.parseInt(userInput.readLine());
         int port = 1111;
         host = "pcvm5-13.geni.uchicago.edu";
-//        host = "694e-165-230-161-200.ngrok.io";
-//        host = "172.17.1.27";
+
         System.out.println("\nConnecting to server : "+host+" : "+port);
 
+        Scanner ip = new Scanner(System.in);
+        System.out.println("Enter hash : ");
+        hash = ip.nextLine();
 
         // Begin connection with Server
         Socket clientSocket = new Socket(host, port);
@@ -61,13 +63,15 @@ public class Client{
         inFromServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 
         useWorkers = 2;
-//        hash = "078ed3bfbe6f511d788aad9995ecccf6";
-        hash = "7efc5160dc70371bebfebfaee8867447";
-        System.out.println("Enter number of workers to use : ");
-        Scanner ip = new Scanner(System.in);
+        // hash = "078ed3bfbe6f511d788aad9995ecccf6";
+//        hash = "7efc5160dc70371bebfebfaee8867447";
+        
+
+        System.out.print("Enter number of workers to use : ");        
         useWorkers = ip.nextInt();
         if(useWorkers>totalWorkers)
-            useWorkers=totalWorkers;
+            useWorkers=totalWorkers;        
+        
 
         String csp_init = phase + sp + rType + sp + hash + sp + useWorkers + newLine;
         System.out.println("\nCSP : " + csp_init);
